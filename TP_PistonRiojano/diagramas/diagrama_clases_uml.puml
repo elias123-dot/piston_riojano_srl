@@ -1,0 +1,103 @@
+@startuml
+' Clases del paquete modelo
+' Notación: # PK, * NOT NULL, o NULL
+' ------------------------------
+' Clase Vehiculo (abstracta)
+abstract class Vehiculo {
+  -patente: String
+  -marca: String
+  -modelo: String
+  -año: int
+  -tipo: String
+  o_cantidad_puertas: int
+  ocombustible: String
+  ocilindrada: int
+  ' Métodos abstractos
+  +coeficiente(): double {abstract}
+  +getTipo(): String {abstract}
+}
+' Auto hereda Vehiculo
+auto <|-- Vehiculo
+' Atributos adicionales de Auto
+auto : -cantidadPuertas: int
+auto : -combustible: String
+' Moto hereda Vehiculo
+moto <|-- Vehiculo
+' Atributos adicionales de Moto
+moto : -cilindrada: int
+' Clase Cliente
+class Cliente {
+  -dni: String
+  -nombre: String
+  -apellido: String
+  -telefono: String
+  oemail: String
+}
+' Clase Mecanico
+class Mecanico {
+  -legajo: int
+  -nombre: String
+  -apellido: String
+  -especialidad: String
+  -valorHora: double
+}
+' Clase Repuesto
+class Repuesto {
+  -codigo: String
+  -descripcion: String
+  -precioUnitario: double
+  -stock: int
+}
+' Clase OrdenTrabajo
+class OrdenTrabajo {
+  -numero: int
+  -fechaIngreso: LocalDate
+  -descripcion: String
+  -estado: EstadoOrden
+  -horas: double
+  ' Asociación con DetalleRepuesto ( composición )
+  -agregarRepuesto(r: Repuesto, cant: int): void
+  -total(): double
+}
+' Clase DetalleRepuesto
+class DetalleRepuesto {
+  -cantidad: int
+  -precioAplicado: double
+  +subtotal(): double
+}
+' Clase EstadoOrden (enumeración)
+enum EstadoOrden {
+  PENDIENTE
+  EN_REPARACION
+  FINALIZADA
+  ENTREGADA
+}
+' Clase StockInsuficienteException (excepción)
+class StockInsuficienteException {
+  <<exception>>
+  -mensaje: String
+}
+' Relaciones de asociación con multiplicidad
+' OrdenTrabajo "1" o-- "0..*" DetalleRepuesto : contiene
+OrdenTrabajo "1" o-- "1" Vehiculo : de
+OrdenTrabajo "1" o-- "1" Mecanico : de
+' Cliente "1" o-- "0..*" Vehiculo : tiene
+Cliente ||--o{ Vehiculo : "1 cliente\n0..N vehiculos"
+' Mecanico "1" o-- "0..*" OrdenTrabajo : atiende
+Mecanico ||--o{ OrdenTrabajo : "1 mecanico\n0..N ordenes"
+' Vehiculo "1" o-- "0..N" OrdenTrabajo : tiene
+Vehiculo ||--o{ OrdenTrabajo : "1 vehiculo\n0..N ordenes"
+' Repuesto "1" o-- "0..N" OrdenRepuesto : usado en
+Repuesto ||--o{ OrdenRepuesto : "1 repuesto\n0..N detalles"
+' Herencia
+' Auto <|-- Vehiculo (ya hecho arriba)
+' Moto <|-- Vehiculo (ya hecho arriba)
+' Nota: los símbolos #, * , o en los atributos se muestran en el diagrama
+' según el estilo Barker/Oracle Data Modeler.
+' Leyenda (puede ponerse como nota al final)
+note right of Vehiculo
+  # PK : Primary Key
+  * NOT NULL : Obligatorio
+  o NULL : Opcional
+end note
+@enduml

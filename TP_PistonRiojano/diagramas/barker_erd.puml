@@ -1,0 +1,73 @@
+@startuml
+!define er-diagram \n
+' ---------- Entidades ----------
+' Tabla: cliente
+entity "Cliente" {
+  #dni : char(8)
+  *nombre : varchar(50)
+  *apellido : varchar(50)
+  *telefono : varchar(20)
+  oemail : varchar(80)
+}
+' Tabla: vehiculo
+entity "Vehiculo" {
+  #patente : varchar(7)
+  *marca : varchar(30)
+  *modelo : varchar(30)
+  *año : integer
+  *tipo : varchar(4)
+  o_cantidad_puertas : integer
+  ocombustible : varchar(6)
+  ocilindrada : integer
+}
+' Tabla: mecanico
+entity "Mecanico" {
+  #legajo : integer
+  *nombre : varchar(50)
+  *apellido : varchar(50)
+  *especialidad : varchar(15)
+  *valor_hora : numeric(10,2)
+}
+' Tabla: repuesto
+entity "Repuesto" {
+  #codigo : varchar(10)
+  *descripcion : varchar(80)
+  *precio_unitario : numeric(12,2)
+  *stock : integer
+}
+' Tabla: orden_trabajo
+entity "Orden_trabajo" {
+  #numero : serial
+  *fecha_ingreso : date
+  *descripcion : varchar(200)
+  *estado : varchar(15) ' PENDIENTE|EN_REPARACION|FINALIZADA|ENTREGADA
+  *horas : numeric(5,1)
+  *patente : varchar(7)
+  *legajo : integer
+}
+' Tabla: orden_repuesto
+entity "Orden_repuesto" {
+  #orden_numero : integer
+  #repuesto_codigo : varchar(10)
+  *cantidad : integer
+  *precio_aplicado : numeric(12,2)
+}
+
+' ---------- Relaciones (Crow's Foot Barker) ----------
+' 1 cliente -{ 0..N vehiculo (por cliente_dni)
+Cliente ||--o{ Vehiculo : "1 cliente\n0..N vehiculos"
+' 1 vehiculo -{ 0..N orden_trabajo (por patente)
+Vehiculo ||--o{ Orden_trabajo : "1 vehiculo\n0..N ordenes"
+' 1 mecanico -{ 0..N orden_trabajo (por legajo)
+Mecanico ||--o{ Orden_trabajo : "1 mecanico\n0..N ordenes"
+' 1 orden_trabajo -{ 0..N orden_repuesto (por orden_numero)
+Orden_trabajo ||--o{ Orden_repuesto : "1 orden\n1..N detalles"
+' 1 repuesto -{ 0..N orden_repuesto (por repuesto_codigo)
+Repuesto ||--o{ Orden_repuesto : "1 repuesto\n0..N detalles"
+' Leyenda (opcional, se puede poner como nota)
+note right of Vehiculo
+  # PK -> primary key
+  * NOT NULL -> obligatorio
+  o NULL -> opcional
+end note
+@enduml

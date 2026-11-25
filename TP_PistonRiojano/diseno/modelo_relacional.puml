@@ -1,0 +1,74 @@
+@startuml
+title Modelo Relacional - Taller Mecánico "Pistón Riojano SRL"
+
+hide circle
+skinparam linetype ortho
+skinparam entityBackgroundColor white
+skinparam entityBorderStyle black
+skinparam shadowing false
+skinparam defaultFontSize 12
+
+entity "Cliente" as cliente {
+  # dni : VARCHAR(11)
+  --
+  * nombre : VARCHAR(50)
+  * apellido : VARCHAR(50)
+  * telefono : VARCHAR(20)
+  o email : VARCHAR(80)
+}
+
+entity "Vehiculo" as vehiculo {
+  # patente : VARCHAR(10)
+  --
+  * marca : VARCHAR(20)
+  * modelo : VARCHAR(20)
+  * año : INTEGER
+  * tipo : VARCHAR(5)  <<AUTO | MOTO>>
+  o cantidad_puertas : INTEGER  <<solo AUTO>>
+  o combustible : VARCHAR(6)  <<solo AUTO>>
+  o cilindrada : INTEGER  <<solo MOTO>>
+  * dni_cliente : VARCHAR(11) <<FK>>
+}
+
+entity "Mecanico" as mecanico {
+  # legajo : INTEGER
+  --
+  * nombre : VARCHAR(50)
+  * apellido : VARCHAR(50)
+  * especialidad : VARCHAR(30)
+  * valor_hora : NUMERIC(10,2)
+}
+
+entity "Repuesto" as repuesto {
+  # codigo : VARCHAR(15)
+  --
+  * descripcion : VARCHAR(80)
+  * precio_unitario : NUMERIC(10,2)
+  * stock : INTEGER
+}
+
+entity "OrdenTrabajo" as orden {
+  # numero : SERIAL
+  --
+  * fecha_ingreso : DATE
+  * descripcion : VARCHAR(200)
+  * estado : VARCHAR(15) <<PENDIENTE | EN_REPARACION | FINALIZADA | ENTREGADA>>
+  * horas : NUMERIC(5,1)
+  * patente : VARCHAR(10) <<FK>>
+  * legajo : INTEGER <<FK>>
+}
+
+entity "OrdenRepuesto" as ordenRepuesto {
+  # orden_numero : INTEGER <<FK>>
+  # codigo_repuesto : VARCHAR(15) <<FK>>
+  --
+  * cantidad : INTEGER
+  * precio_aplicado : NUMERIC(10,2)
+}
+
+cliente ||--o{ vehiculo : "1 cliente\n0..N vehiculos"
+vehiculo ||--o{ orden : "1 vehiculo\n0..N ordenes"
+mecanico ||--o{ orden : "1 mecanico\n0..N ordenes"
+orden ||--|{ ordenRepuesto : "1 orden\n1..N detalles"
+repuesto ||--o{ ordenRepuesto : "1 repuesto\n0..N detalles"
+@enduml

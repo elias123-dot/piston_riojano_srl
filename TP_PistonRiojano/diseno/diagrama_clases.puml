@@ -1,0 +1,114 @@
+﻿@startuml
+title Taller Mecánico "Pistón Riojano SRL" - Diagrama de Clases UML
+
+enum EstadoOrden {
+  PENDIENTE
+  EN_REPARACION
+  FINALIZADA
+  ENTREGADA
+}
+
+
+class StockInsuficienteException {
+  +StockInsuficienteException(mensaje : String)
+}
+
+class Cliente {
+  -dni : String
+  -nombre : String
+  -apellido : String
+  -telefono : String
+  -email : String
+  +getDni() : String
+  +setEmail(email : String)
+}
+
+abstract class Vehiculo {
+  -patente : String
+  -marca : String
+  -modelo : String
+  -año : int
+  +coeficiente() : double {abstract}
+  +getTipo() : String {abstract}
+  +getPatente() : String
+  +getCliente() : Cliente
+}
+
+class Auto {
+  -cantidadPuertas : int
+  -combustible : String
+  +coeficiente() : double
+  +getTipo() : String
+}
+
+class Moto {
+  -cilindrada : int
+  +coeficiente() : double
+  +getTipo() : String
+}
+
+class Mecanico {
+  -legajo : int
+  -nombre : String
+  -apellido : String
+  -especialidad : String
+  -valorHora : double
+  +getValorHora() : double
+}
+
+class Repuesto {
+  -codigo : String
+  -descripcion : String
+  -precioUnitario : double
+  -stock : int
+  +getStock() : int
+  +getPrecioUnitario() : double
+}
+
+class DetalleRepuesto {
+  -cantidad : int
+  -precioAplicado : double
+  +subtotal() : double
+}
+
+class OrdenTrabajo {
+  -numero : int
+  -fechaIngreso : LocalDate
+  -descripcion : String
+  -estado : EstadoOrden
+  -horas : double
+  +agregarRepuesto(r : Repuesto, cant : int) throws StockInsuficienteException
+  +total() : double
+}
+
+' ---- relaciones: asociaciones con multiplicidad en los DOS extremos ----
+' (ida y vuelta: se puede leer en ambos sentidos)
+Vehiculo <|-- Auto
+Vehiculo <|-- Moto
+Cliente "1" -- "0..*" Vehiculo : tiene / pertenece a
+OrdenTrabajo "0..*" -- "1" Vehiculo : es de / registra ordenes
+OrdenTrabajo "0..*" -- "1" Mecanico : es atendida por / tiene a cargo
+OrdenTrabajo "1" -- "0..*" DetalleRepuesto : contiene / pertenece a
+DetalleRepuesto "0..*" -- "1" Repuesto : referencia / es usado en
+OrdenTrabajo --> EstadoOrden : tiene estado
+OrdenTrabajo ..> StockInsuficienteException : lanza
+
+note right of Vehiculo
+  [POLIMORFISMO]
+  Auto: diesel 1,20 / resto 1,00
+  Moto: <=250cc 0,80 / resto 1,00
+  Sin instanceof: cada subclase
+  redefine el metodo abstracto
+end note
+
+note bottom of OrdenTrabajo
+  [VALIDACION DE STOCK]
+  agregarRepuesto() lanza la
+  excepcion propia si el stock no alcanza
+  --
+  [CALCULO DEL TOTAL]
+  total() = horas x valorHora x coeficiente()
+  + suma de subtotales de repuestos
+end note
+@enduml
+
